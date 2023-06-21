@@ -29,7 +29,7 @@ public class Photo {
     @Column(name = "file_size", unique = false, nullable = false)
     private int fileSize;
 
-    @Column(name = "uploaded_at", unique = false, nullable = false)
+    @Column(name = "uploaded_at", unique = false, nullable = true)
     @CreationTimestamp
     private Date uploadedAt;
 

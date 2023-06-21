@@ -11,5 +11,5 @@ public class AlbumDto {
     Long albumId;
     String albumName;
     Date createdAt;
-    int count;
+    int photoCount;
 }

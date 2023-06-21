@@ -21,7 +21,7 @@ public class Album {
     @Column(name = "album_name", unique = false, nullable = false)
     private String albumName;
 
-    @Column(name = "crated_at", unique = false, nullable = false)
+    @Column(name = "created_at", unique = false, nullable = true)
     @CreationTimestamp  //새로운 앨범을 생성해 DB INSERT할 때 자동으로 현재 시간을 입력
     private Date createdAt;
 
