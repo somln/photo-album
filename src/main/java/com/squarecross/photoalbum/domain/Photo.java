@@ -5,7 +5,7 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
-import java.sql.Date;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "photo", schema = "photo_album", uniqueConstraints = {@UniqueConstraint(columnNames = "photo_id")} )
@@ -17,21 +17,21 @@ public class Photo {
     @Column(name = "photo_id", unique = true, nullable = false)
     private Long photoId;
 
-    @Column(name = "file_name", unique = false, nullable = false)
+    @Column(name = "file_name", unique = false, nullable = true)
     private String fileName;
 
-    @Column(name = "thumb_url", unique = false, nullable = false)
-    private String thumbUrl;
-
-    @Column(name = "original_url", unique = false, nullable = false)
-    private String originalUrl;
-
-    @Column(name = "file_size", unique = false, nullable = false)
+    @Column(name = "file_size", unique = false, nullable = true)
     private int fileSize;
 
-    @Column(name = "uploaded_at", unique = false, nullable = true)
+    @Column(name="original_url", unique = false, nullable = true)
+    private String originalUrl;
+
+    @Column(name="thumb_url", unique = false, nullable = true)
+    private String thumbUrl;
+
+    @Column(name="uploaded_at", unique = false, nullable = true)
     @CreationTimestamp
-    private Date uploadedAt;
+    private LocalDateTime uploadedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     //여러개의 photo가 하나의 album에 속해있기 때문에 ManyToOne
