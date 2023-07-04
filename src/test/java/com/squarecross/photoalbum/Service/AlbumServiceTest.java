@@ -98,23 +98,26 @@ class AlbumServiceTest {
     void testGetAlbumList() throws InterruptedException {
         Album album1 = new Album();
         Album album2 = new Album();
-        album1.setAlbumName("abcd");
-        album2.setAlbumName("abce");
+        Album album3 = new Album();
+        album1.setAlbumName("test1");
+        album2.setAlbumName("test2");
+        album3.setAlbumName("aaaa");
 
         albumRepository.save(album1);
-        TimeUnit.SECONDS.sleep(5); //시간차를 벌리기위해 두번째 앨범 생성 1초 딜레이
+        TimeUnit.SECONDS.sleep(1); //시간차를 벌리기위해 두번째 앨범 생성 1초 딜레이
         albumRepository.save(album2);
+        albumRepository.save(album3);
 
+        //앨범 생성된 순으로 오름차순 정렬 확인
+        List<Album> resDate = albumRepository.findByAlbumNameContainingOrderByCreatedAtAsc("test");
+        assertEquals("test1", resDate.get(0).getAlbumName());
+        assertEquals("test2", resDate.get(1).getAlbumName());
+        assertEquals(2, resDate.size());  //이름에 test가 들어간 앨범을 검색했을 때 2개가 나오는 지 확인
 
-        List<Album> resDate = albumRepository.findByAlbumNameContainingOrderByCreatedAtDesc("abc");
-        assertEquals("abcd", resDate.get(0).getAlbumName());
-        assertEquals("abce", resDate.get(1).getAlbumName());
-        assertEquals(2, resDate.size());
-
-        //앨범명 정렬, aaaa -> aaab 기준으로 나와야합니다
-        List<Album> resName = albumRepository.findByAlbumNameContainingOrderByAlbumNameAsc("abc");
-        assertEquals("abcd", resName.get(0).getAlbumName());
-        assertEquals("abce", resName.get(1).getAlbumName());
+        //앨범명으로 내림차순 정렬 확인
+        List<Album> resName = albumRepository.findByAlbumNameContainingOrderByAlbumNameDesc("test");
+        assertEquals("test2", resName.get(0).getAlbumName());
+        assertEquals("test1", resName.get(1).getAlbumName());
         assertEquals(2, resName.size());
     }
 
