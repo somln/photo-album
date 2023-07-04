@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter @Setter
 public class AlbumDto {
@@ -12,5 +13,7 @@ public class AlbumDto {
     String albumName;
     LocalDateTime createdAt;
     int count;
+    private List<String> thumbUrls;
+
 
 }

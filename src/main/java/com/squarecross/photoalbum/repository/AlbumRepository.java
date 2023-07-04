@@ -11,5 +11,10 @@ import java.util.Optional;
 @Repository
 public interface AlbumRepository extends JpaRepository<Album, Long> {
 
+    //앨범 이름이 일치하는 Album 객체 반환
     Optional<Album> findByAlbumName(String albumName);
+    List<Album> findByAlbumNameContainingOrderByCreatedAtDesc(String keyword);
+    List<Album> findByAlbumNameContainingOrderByCreatedAtAsc(String keyword);
+    List<Album> findByAlbumNameContainingOrderByAlbumNameDesc(String keyword);
+    List<Album> findByAlbumNameContainingOrderByAlbumNameAsc(String keyword);
 }
