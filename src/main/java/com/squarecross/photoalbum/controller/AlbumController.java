@@ -6,8 +6,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.persistence.ElementCollection;
+import javax.persistence.EntityNotFoundException;
 import java.io.IOException;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 
 @RestController
@@ -51,7 +54,20 @@ public class AlbumController {
         return ResponseEntity.ok().build();
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Void> handleIllegalArgumentException(IllegalArgumentException e) {
+        return ResponseEntity.badRequest().build();
+    }
 
+    @ExceptionHandler(IOException.class)
+    public ResponseEntity<Void> handleIOException(IOException e) {
+        return ResponseEntity.badRequest().build();
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<Void> handleEntityNotFoundException(EntityNotFoundException e) {
+        return ResponseEntity.notFound().build();
+    }
 
 
  }

@@ -9,17 +9,14 @@ import com.squarecross.photoalbum.repository.AlbumRepository;
 import com.squarecross.photoalbum.repository.PhotoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.bcel.Const;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -102,7 +99,7 @@ public class AlbumService {
 
         Optional<Album> album = albumRepository.findById(albumId);
         if(album.isEmpty()) {
-            throw new NoSuchElementException(String.format("album ID '%d'가 존재하지 않습니다", albumId));
+            throw new EntityNotFoundException(String.format("album ID '%d'가 존재하지 않습니다", albumId));
         }
 
         Album updateAlbum = album.get();
@@ -136,7 +133,7 @@ public class AlbumService {
                     try {
                         Files.deleteIfExists(path); //파일 삭제
                     } catch (IOException e) {
-                        throw new RuntimeException(e);
+                        log.error("파일 삭제 실패: " + path, e);
                     }
                         });
 
