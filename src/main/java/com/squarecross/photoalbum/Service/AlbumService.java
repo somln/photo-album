@@ -9,16 +9,20 @@ import com.squarecross.photoalbum.repository.AlbumRepository;
 import com.squarecross.photoalbum.repository.PhotoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.bcel.Const;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -94,4 +98,49 @@ public class AlbumService {
         return albumDtos;
     }
 
+    public AlbumDto updateAlbum(long albumId, AlbumDto albumDto){
+
+        Optional<Album> album = albumRepository.findById(albumId);
+        if(album.isEmpty()) {
+            throw new NoSuchElementException(String.format("album ID '%d'가 존재하지 않습니다", albumId));
+        }
+
+        Album updateAlbum = album.get();
+        updateAlbum.setAlbumName(albumDto.getAlbumName());
+        Album savedAlbum = albumRepository.save(updateAlbum);
+        return AlbumMapper.convertToDto(savedAlbum);
+    }
+
+    public void deleteAlbum(long albumId) throws IOException {
+        Album album = albumRepository.findById(albumId).orElseThrow(() -> new NoSuchElementException("존재하지 않는 앨범입니다."));
+        albumRepository.deleteById(albumId);
+        try {
+            deleteAlbumDirectories(album);
+        } catch (IOException e) {
+            log.error(album + "앨범 디렉토리 삭제 실패", e);
+            throw new IOException("앨범 디렉토리 삭제 실패");
+        }
+    }
+
+    public void deleteAlbumDirectories(Album album) throws IOException {
+
+        //디렉토리의 전체 경로 저장하기
+        String originalPath = Constants.PATH_PREFIX+"/photos/original/"+album.getAlbumId();
+        String thumbPath = Constants.PATH_PREFIX+"/photos/thumb/"+album.getAlbumId();
+
+        Stream.concat(Files.walk(Paths.get(originalPath)), Files.walk(Paths.get(thumbPath)))
+                //originalPath 아래 모든 파일목록과 thumbPath 아래 모든 파일목록 합치기
+                .filter(Files::isRegularFile)
+                //디렉토리가 아니라 일반 파일이 맞는지 확인
+                .forEach( path -> {
+                    try {
+                        Files.deleteIfExists(path); //파일 삭제
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                        });
+
+        Files.deleteIfExists(Paths.get(originalPath));  //original 앨범 디렉토리 삭제
+        Files.deleteIfExists(Paths.get(thumbPath));  //thumb 앨범 디렉토리 삭제
+    }
 }
