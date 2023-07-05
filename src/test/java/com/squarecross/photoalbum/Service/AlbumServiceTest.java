@@ -4,11 +4,9 @@ import com.squarecross.photoalbum.Constants;
 import com.squarecross.photoalbum.domain.Album;
 import com.squarecross.photoalbum.domain.Photo;
 import com.squarecross.photoalbum.dto.AlbumDto;
-import com.squarecross.photoalbum.mapper.AlbumMapper;
 import com.squarecross.photoalbum.repository.AlbumRepository;
 import com.squarecross.photoalbum.repository.PhotoRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,10 +81,10 @@ class AlbumServiceTest {
 
     @Test
     @DisplayName("앨범 생성 테스트")
-    void testCreateAlbum() throws IOException {
+    void createAlbum() throws IOException {
         AlbumDto requestAlbumDto = new AlbumDto();
         requestAlbumDto.setAlbumName("test album");
-        AlbumDto responseAlbumDto = albumService.createAlbum(requestAlbumDto);
+        AlbumDto responseAlbumDto = assertDoesNotThrow(() -> albumService.createAlbum(requestAlbumDto));
 
         assertThat(responseAlbumDto.getAlbumName()).isEqualTo("test album");
         assertTrue(Files.exists(Paths.get(Constants.PATH_PREFIX + "/photos/original/" + responseAlbumDto.getAlbumId())));
@@ -95,7 +93,7 @@ class AlbumServiceTest {
 
     @Test
     @DisplayName("앨범 검색, 정렬 테스트")
-    void testGetAlbumList() throws InterruptedException {
+    void getAlbumList() throws InterruptedException {
         Album album1 = new Album();
         Album album2 = new Album();
         Album album3 = new Album();
@@ -123,7 +121,7 @@ class AlbumServiceTest {
 
     @Test
     @DisplayName("앨범명 수정 테스트")
-    void testUpdateAlbum() throws IOException {
+    void updateAlbum() throws IOException {
         //앨범 생성
         AlbumDto albumDto = new AlbumDto();
         albumDto.setAlbumName("before");
@@ -138,6 +136,21 @@ class AlbumServiceTest {
 
         //앨범명 변경되었는지 확인
         assertEquals("after", updatedDto.getAlbumName());
+    }
+
+    @Test
+    @DisplayName("앨범 삭제 테스트")
+    void deleteAlbum() throws IOException {
+        AlbumDto albumDto = new AlbumDto();
+        albumDto.setAlbumName("test");
+        AlbumDto savedAlbum = assertDoesNotThrow(() -> albumService.createAlbum(albumDto));
+
+        Long albumId = savedAlbum.getAlbumId();
+        assertDoesNotThrow(() -> albumService.deleteAlbum(albumId));
+
+        assertThrows(EntityNotFoundException.class, () -> albumService.getAlbum(albumId));
+        assertFalse(Files.exists(Paths.get(Constants.PATH_PREFIX+"/photos/original/"+albumId)));
+        assertFalse(Files.exists(Paths.get(Constants.PATH_PREFIX+"/photos/thumb/"+albumDto)));
     }
 
 }
