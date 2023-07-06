@@ -1,8 +1,6 @@
 package com.squarecross.photoalbum.domain;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
@@ -11,6 +9,7 @@ import java.util.List;
 
 @Entity
 @Getter @Setter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name="album", schema = "photo_album", uniqueConstraints = {@UniqueConstraint(columnNames = "album_id")})
 public class Album {
 
@@ -26,17 +25,29 @@ public class Album {
     @CreationTimestamp
     private LocalDateTime createdAt;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "album", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "album", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     //FetchType.LAZY: photo 정보가 필요할 때만 불러옴
     //mappedBy="album": 반대쪽에 자신이 매핑되어 있는 필드명은 album
-    //ascade = CascadeType.ALL: 부모 엔티티(album)에 대해 수행된 작업이 있을 때, 동일한 작업이 photo 엔터티로 자동 전파
+    //cascade = CascadeType.ALL: 부모 엔티티(album)에 대해 수행된 작업이 있을 때, 동일한 작업이 photo 엔터티로 자동 전파
     private List<Photo> photos;
 
     @Builder
-    public Album(String name) {
-        this.albumName = name;
+    public Album(String albumName) {
+        this.albumName = albumName;
     }
 
-    public Album(){}
+    @Builder(builderMethodName = "dtoBuilder")
+    public Album(Long albumId, String albumName, LocalDateTime createdAt) {
+        this.albumId = albumId;
+        this.albumName = albumName;
+        this.createdAt = createdAt;
+    }
+
+    public static Album createAlbum(String albumName) {
+        return Album.builder()
+                .albumName(albumName)
+                .build();
+    }
+
 
 }

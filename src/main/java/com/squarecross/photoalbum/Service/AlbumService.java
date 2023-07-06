@@ -30,25 +30,19 @@ public class AlbumService {
     private final PhotoRepository photoRepository;
 
     public AlbumDto getAlbum(Long albumId){
-        Optional<Album> res=albumRepository.findById(albumId);
-        if(res.isPresent()){
-            AlbumDto albumDto= AlbumMapper.convertToDto(res.get());
-            albumDto.setCount(photoRepository.countByAlbum_AlbumId(albumId));
-            return albumDto;
-        }else{
-            throw new EntityNotFoundException(String.format("앨범 아이디 %d로 조회되지 않았습니다.",albumId));
-        }
+        Album album = albumRepository.findById(albumId)
+                .orElseThrow(() -> new EntityNotFoundException("id " + albumId + "인 앨범이 없습니다."));
+        AlbumDto albumDto = AlbumMapper.convertToDto(album);
+        albumDto.setPhotoCount(photoRepository.countByAlbum_AlbumId(albumId));
+        return AlbumMapper.convertToDto(album);
     }
 
     public AlbumDto getAlbumByAlbumName(String albumName) {
-        Optional<Album> res = albumRepository.findByAlbumName(albumName);
-        if (res.isPresent()) {
-            AlbumDto albumDto = AlbumMapper.convertToDto(res.get());
-            albumDto.setCount(photoRepository.countByAlbum_AlbumId(albumDto.getAlbumId()));
-            return albumDto;
-        } else {
-            throw new EntityNotFoundException();
-        }
+        Album album = albumRepository.findByAlbumName(albumName).
+                orElseThrow(() -> new EntityNotFoundException());
+        AlbumDto albumDto = AlbumMapper.convertToDto(album);
+        albumDto.setPhotoCount(photoRepository.countByAlbum_AlbumId(albumDto.getAlbumId()));
+        return AlbumMapper.convertToDto(album);
     }
 
     public AlbumDto createAlbum(AlbumDto albumDto) throws IOException {

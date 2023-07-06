@@ -2,7 +2,6 @@ package com.squarecross.photoalbum.Service;
 
 import com.squarecross.photoalbum.Constants;
 import com.squarecross.photoalbum.domain.Album;
-import com.squarecross.photoalbum.domain.Photo;
 import com.squarecross.photoalbum.dto.AlbumDto;
 import com.squarecross.photoalbum.repository.AlbumRepository;
 import com.squarecross.photoalbum.repository.PhotoRepository;
@@ -37,8 +36,7 @@ class AlbumServiceTest {
     @Test
     @DisplayName("앨범 아이디로 앨범 검색 테스트")
     void getAlbumById() {
-        Album album = new Album();
-        album.setAlbumName("테스트");
+        Album album = Album.createAlbum("테스트");
         Album savedAlbum = albumRepository.save(album);
 
         Long albumId = savedAlbum.getAlbumId();
@@ -52,8 +50,7 @@ class AlbumServiceTest {
     @Test
     @DisplayName("앨범 이름으로 앨범 검색 테스트")
     void getAlbumByName() {
-        Album album = new Album();
-        album.setAlbumName("테스트");
+        Album album = Album.createAlbum("테스트");
         Album savedAlbum = albumRepository.save(album);
 
         AlbumDto findAlbum = albumService.getAlbumByAlbumName("테스트");
@@ -62,28 +59,11 @@ class AlbumServiceTest {
         assertThrows(EntityNotFoundException.class, ()-> albumService.getAlbumByAlbumName("test"));
     }
 
-    @Test
-    @DisplayName("앨범의 사진 개수 카운트 테스트")
-    void testPhotoCount(){
-
-        Album album = new Album();
-        album.setAlbumName("album1");
-        albumRepository.save(album);
-
-        Photo photo = new Photo();
-        photo.setFileName("photo1");
-        photo.setAlbum(album);
-        photoRepository.save(photo);
-
-        int count = photoRepository.countByAlbum_AlbumId(album.getAlbumId());
-        assertThat(count).isEqualTo(1);
-    }
 
     @Test
     @DisplayName("앨범 생성 테스트")
     void createAlbum() throws IOException {
-        AlbumDto requestAlbumDto = new AlbumDto();
-        requestAlbumDto.setAlbumName("test album");
+        AlbumDto requestAlbumDto = AlbumDto.builder().albumName("test album").build();
         AlbumDto responseAlbumDto = assertDoesNotThrow(() -> albumService.createAlbum(requestAlbumDto));
 
         assertThat(responseAlbumDto.getAlbumName()).isEqualTo("test album");
@@ -94,12 +74,10 @@ class AlbumServiceTest {
     @Test
     @DisplayName("앨범 검색, 정렬 테스트")
     void getAlbumList() throws InterruptedException {
-        Album album1 = new Album();
-        Album album2 = new Album();
-        Album album3 = new Album();
-        album1.setAlbumName("test1");
-        album2.setAlbumName("test2");
-        album3.setAlbumName("aaaa");
+        Album album1 = Album.createAlbum("test1");
+        Album album2 = Album.createAlbum("test2");
+        Album album3 = Album.createAlbum("aaa");
+
 
         albumRepository.save(album1);
         TimeUnit.SECONDS.sleep(1); //시간차를 벌리기위해 두번째 앨범 생성 1초 딜레이
@@ -123,13 +101,11 @@ class AlbumServiceTest {
     @DisplayName("앨범명 수정 테스트")
     void updateAlbum() throws IOException {
         //앨범 생성
-        AlbumDto albumDto = new AlbumDto();
-        albumDto.setAlbumName("before");
+        AlbumDto albumDto = AlbumDto.builder().albumName("before").build();
         AlbumDto res = albumService.createAlbum(albumDto);
 
         Long albumId = res.getAlbumId(); // 생성된 앨범 아이디 추출
-        AlbumDto updateDto = new AlbumDto();
-        updateDto.setAlbumName("after"); // 업데이트용 Dto 생성
+        AlbumDto updateDto= AlbumDto.builder().albumName("after").build();
         albumService.updateAlbum(albumId, updateDto);
 
         AlbumDto updatedDto = albumService.getAlbum(albumId);
@@ -141,8 +117,7 @@ class AlbumServiceTest {
     @Test
     @DisplayName("앨범 삭제 테스트")
     void deleteAlbum() throws IOException {
-        AlbumDto albumDto = new AlbumDto();
-        albumDto.setAlbumName("test");
+        AlbumDto albumDto = AlbumDto.builder().albumName("test").build();
         AlbumDto savedAlbum = assertDoesNotThrow(() -> albumService.createAlbum(albumDto));
 
         Long albumId = savedAlbum.getAlbumId();

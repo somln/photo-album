@@ -39,5 +39,7 @@ public class Photo {
     @JoinColumn(name="album_id")
     private Album album;
 
+
     public Photo(){};
+
 }
