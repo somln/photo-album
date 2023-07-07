@@ -23,6 +23,7 @@ dependencies {
 	//JPA 관련
 	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.imgscalr:imgscalr-lib:4.2'
     testImplementation 'org.projectlombok:lombok:1.18.22'
 	testImplementation 'org.projectlombok:lombok:1.18.22'
 	runtimeOnly 'com.mysql:mysql-connector-j'
@@ -31,6 +32,7 @@ dependencies {
 	//롬복 관련
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
+
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
