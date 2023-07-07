@@ -1,13 +1,13 @@
 package com.squarecross.photoalbum.domain;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "photo", schema = "photo_album", uniqueConstraints = {@UniqueConstraint(columnNames = "photo_id")} )
 @Getter @Setter
 public class Photo {
@@ -39,7 +39,32 @@ public class Photo {
     @JoinColumn(name="album_id")
     private Album album;
 
+    @Builder
+    public Photo(String fileName, int fileSize, String originalUrl, String thumbUrl, LocalDateTime uploadedAt) {
+        this.fileName = fileName;
+        this.fileSize = fileSize;
+        this.originalUrl = originalUrl;
+        this.thumbUrl = thumbUrl;
+        this.uploadedAt = uploadedAt;
+    }
 
-    public Photo(){};
+    @Builder(builderMethodName = "dtoBuilder")
+    public Photo(Long photoId, String fileName, int fileSize, String originalUrl, String thumbUrl, LocalDateTime uploadedAt) {
+        this.photoId = photoId;
+        this.fileName = fileName;
+        this.fileSize = fileSize;
+        this.originalUrl = originalUrl;
+        this.thumbUrl = thumbUrl;
+        this.uploadedAt = uploadedAt;
+    }
+
+    public static Photo createPhoto(String fileName, int fileSize, String originalUrl, String thumbUrl) {
+        return Photo.builder()
+                .fileName(fileName)
+                .fileSize(fileSize)
+                .originalUrl(originalUrl)
+                .thumbUrl(thumbUrl)
+                .build();
+    }
 
 }
