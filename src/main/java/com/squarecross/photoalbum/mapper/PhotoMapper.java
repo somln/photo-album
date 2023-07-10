@@ -20,6 +20,7 @@ public class PhotoMapper {
                 .originalUrl(photo.getOriginalUrl())
                 .thumbUrl(photo.getThumbUrl())
                 .uploadedAt(photo.getUploadedAt())
+                .albumId(photo.getAlbum().getAlbumId())
                 .build();
 
     }

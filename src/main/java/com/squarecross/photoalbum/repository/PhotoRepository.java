@@ -10,8 +10,9 @@ import java.util.Optional;
 @Repository
 public interface PhotoRepository extends JpaRepository<Photo, Long> {
 
-    //특정 앨범에 속해있는 사진의 개수를 카운트
     int countByAlbum_AlbumId(Long albumId);
     List<Photo> findTop4ByAlbum_AlbumIdOrderByUploadedAtDesc(Long albumId);
     Optional<Photo> findByAlbum_AlbumIdAndPhotoId(Long albumId, Long photoId);
+    Optional<Photo> findByAlbum_AlbumIdAndFileName(Long albumI, String fileName);
+
 }
