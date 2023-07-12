@@ -36,13 +36,6 @@ public class Album {
         this.albumName = albumName;
     }
 
-    @Builder(builderMethodName = "dtoBuilder")
-    public Album(Long albumId, String albumName, LocalDateTime createdAt) {
-        this.albumId = albumId;
-        this.albumName = albumName;
-        this.createdAt = createdAt;
-    }
-
     public static Album createAlbum(String albumName) {
         return Album.builder()
                 .albumName(albumName)

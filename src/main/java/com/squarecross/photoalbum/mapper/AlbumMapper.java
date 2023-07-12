@@ -17,11 +17,11 @@ public class AlbumMapper {
     }
 
     public static Album convertToModel(AlbumDto albumDto){
-        return Album.dtoBuilder()
-                .albumId(albumDto.getAlbumId())
-                .albumName(albumDto.getAlbumName())
-                .createdAt(albumDto.getCreatedAt())
-                .build();
+        Album album = Album.builder()
+                .albumName(albumDto.getAlbumName()).build();
+        album.setAlbumId(albumDto.getAlbumId());
+        album.setCreatedAt(albumDto.getCreatedAt());
+        return album;
     }
 
     public static List<AlbumDto> convertToDtoList(List<Album> albums){

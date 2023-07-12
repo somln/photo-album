@@ -26,13 +26,14 @@ public class PhotoMapper {
     }
 
     public static Photo convertToModel(PhotoDto photoDto){
-        return Photo.dtoBuilder()
-                .photoId(photoDto.getPhotoId())
+        Photo photo = Photo.builder()
                 .fileName(photoDto.getFileName())
                 .fileSize(photoDto.getFileSize())
                 .originalUrl(photoDto.getOriginalUrl())
                 .thumbUrl(photoDto.getThumbUrl())
                 .uploadedAt(photoDto.getUploadedAt())
                 .build();
+        photo.setPhotoId(photoDto.getPhotoId());
+        return photo;
     }
 }

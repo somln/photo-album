@@ -49,17 +49,6 @@ public class Photo {
         this.album =album;
     }
 
-    @Builder(builderMethodName = "dtoBuilder")
-    public Photo(Long photoId, String fileName, int fileSize, String originalUrl, String thumbUrl, LocalDateTime uploadedAt, Album album) {
-        this.photoId = photoId;
-        this.fileName = fileName;
-        this.fileSize = fileSize;
-        this.originalUrl = originalUrl;
-        this.thumbUrl = thumbUrl;
-        this.uploadedAt = uploadedAt;
-        this.album = album;
-    }
-
     public static Photo createPhoto(String fileName, int fileSize, String originalUrl, String thumbUrl, Album album) {
         return Photo.builder()
                 .fileName(fileName)
