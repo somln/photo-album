@@ -9,6 +9,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class PhotoMapper {
 
@@ -35,5 +37,9 @@ public class PhotoMapper {
                 .build();
         photo.setPhotoId(photoDto.getPhotoId());
         return photo;
+    }
+
+    public static List<PhotoDto> converToDtoList(List<Photo> photos){
+        return photos.stream().map(PhotoMapper:: convertToDto).collect(Collectors.toList());
     }
 }
