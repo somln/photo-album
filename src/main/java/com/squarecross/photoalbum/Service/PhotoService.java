@@ -1,14 +1,15 @@
 package com.squarecross.photoalbum.Service;
 
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.squarecross.photoalbum.Constants;
 import com.squarecross.photoalbum.domain.Album;
 import com.squarecross.photoalbum.domain.Photo;
 import com.squarecross.photoalbum.dto.PhotoDto;
+import com.squarecross.photoalbum.dto.PhotoMoveDto;
 import com.squarecross.photoalbum.mapper.PhotoMapper;
 import com.squarecross.photoalbum.repository.AlbumRepository;
 import com.squarecross.photoalbum.repository.PhotoRepository;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.action.internal.EntityActionVetoException;
 import org.imgscalr.Scalr;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -16,10 +17,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
+import javax.transaction.Transactional;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
@@ -41,13 +44,11 @@ public class PhotoService {
         return PhotoMapper.convertToDto(photo);
     }
 
-    public PhotoDto savePhoto(Long albumId, MultipartFile file) {
+    public PhotoDto uploadPhoto(Long albumId, MultipartFile file) {
 
         //해당 앨범이 존재하는 지 먼저 확인
-        Optional<Album> res = albumRepository.findById(albumId);
-        if (res.isEmpty()) {
-            throw new EntityNotFoundException("앨범이 존재하지 않습니다");
-        }
+        Album album = albumRepository.findById(albumId).orElseThrow(()
+                -> new EntityNotFoundException("앨범이 존재하지 않습니다"));
 
         //파일의 이름과 크기 가져오기
         String fileName = file.getOriginalFilename();
@@ -64,7 +65,7 @@ public class PhotoService {
                 .fileSize(fileSize)
                 .originalUrl(("/photos/original/" + albumId + "/" + fileName))
                 .thumbUrl("/photos/thumb/" + albumId + "/" + fileName)
-                .album(res.get())
+                .album(album)
                 .build();
         //db에 저장하기
         Photo createdPhoto = photoRepository.save(photo);
@@ -117,5 +118,51 @@ public class PhotoService {
      Files.copy(): 파일의 데이터를 복사하는 일반적인 파일 복사 메서드
      ImageIO.write(): BufferedImage를 사용하여 이미지를 저장하는 특수한 메서드
      */
+
+    public File getImageFile(Long photoId){
+        Photo photo = photoRepository.findById(photoId).orElseThrow(() -> new EntityNotFoundException(String.format("사진을 ID %d를 찾을 수 없습니다", photoId)));
+        return new File(Constants.PATH_PREFIX+photo.getOriginalUrl());
+    }
+
+
+    public List<PhotoDto> getPhotoList(Long albumId, String sort) {
+        List<Photo> photos;
+        if (sort.equals("byDate")) {
+            photos = photoRepository.findAllByAlbum_AlbumIdOrderByUploadedAt(albumId);
+        } else if (sort.equals("byName")) {
+            photos = photoRepository.findAllByAlbum_AlbumIdOrderByFileName(albumId);
+        } else {
+            throw new IllegalArgumentException("잘못된 정렬 방식입니다.");
+        }
+        return PhotoMapper.converToDtoList(photos);
+    }
+
+    @Transactional
+    public void movePhotos(PhotoMoveDto photoMoveDto) throws IOException {
+
+        //이동할 앨범이 존재하는 지 확인
+        Album album = albumRepository.findById(photoMoveDto.getToAlbumId())
+                .orElseThrow(() -> new EntityNotFoundException("이동할 앨범이 존재하지 않습니다."));
+
+        //이동할 photoId로 부터 photo 객체 가져오기
+        List<Photo> photos = photoRepository.findAllById(photoMoveDto.getPhotoIds());
+
+        for(Photo photo : photos){
+            String fileName = getNextFileName(photo.getFileName(), photoMoveDto.getToAlbumId());
+            String filePath = photoMoveDto.getToAlbumId() +"/"+ fileName;
+            //파일 이동하기
+            moveFile(photo.getOriginalUrl(), original_path, filePath);
+            moveFile(photo.getThumbUrl(), thumb_path, filePath);
+            //DB 수정하기
+           photo.updateAlbum(album, filePath);
+        }
+    }
+
+    private void moveFile(String toUrl, String path, String filePath) throws IOException {
+        String srcPath = Constants.PATH_PREFIX + toUrl;
+        String dstPath = path + "/" + filePath;
+        Files.move(Paths.get(srcPath), Paths.get(dstPath));
+    }
+
 
 }
