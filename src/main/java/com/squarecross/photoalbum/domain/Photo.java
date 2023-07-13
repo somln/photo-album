@@ -58,4 +58,10 @@ public class Photo {
                 .build();
     }
 
+    public void updateAlbum(Album album, String filePath) {
+        this.setAlbum(album);
+        this.setOriginalUrl("/photos/original/" + filePath);
+        this.setThumbUrl("/photos/thumb/" + filePath);
+    }
+
 }
