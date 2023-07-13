@@ -2,6 +2,7 @@ package com.squarecross.photoalbum.controller;
 
 import com.squarecross.photoalbum.Service.PhotoService;
 import com.squarecross.photoalbum.dto.PhotoDto;
+import com.squarecross.photoalbum.dto.PhotoIdsDto;
 import com.squarecross.photoalbum.dto.PhotoMoveDto;
 import lombok.RequiredArgsConstructor;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
@@ -32,8 +33,9 @@ public class PhotoController {
     //사진 업로드하기
     @PostMapping()
     public ResponseEntity<List<PhotoDto>> uploadPhotos(@PathVariable("albumId") final long albumId,
-                                                       @RequestParam("photos") MultipartFile[] files) throws IOException {
 
+                                                       @RequestParam("photos") MultipartFile[] files) throws IOException {
+        photoService.validateFiles(files);
         List<PhotoDto> photos = new ArrayList<>();
         for (MultipartFile file : files) {
             PhotoDto photoDto = photoService.uploadPhoto(albumId,file);
@@ -68,10 +70,18 @@ public class PhotoController {
 
     //사진 옮기기
     @PutMapping("/move")
-    public ResponseEntity<List<PhotoDto>> movePhotos(@PathVariable String albumId,
+    public ResponseEntity<List<PhotoDto>> movePhotos(@PathVariable Long albumId,
                                                      @RequestBody PhotoMoveDto photoMoveDto) throws IOException {
         photoService.movePhotos(photoMoveDto);
         return ResponseEntity.ok(photoService.getPhotoList(photoMoveDto.getFromAlbumId(), "byDate"));
+    }
+
+    //사진 삭제하기
+    @DeleteMapping()
+    public ResponseEntity<List<PhotoDto>> deletePhotos(@PathVariable Long albumId,
+                                                       @RequestBody PhotoIdsDto photoMoveDto) throws IOException {
+        photoService.deletePhotos(photoMoveDto);
+        return ResponseEntity.ok(photoService.getPhotoList(albumId, "byDate"));
     }
 
 

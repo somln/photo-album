@@ -5,6 +5,7 @@ import com.squarecross.photoalbum.Constants;
 import com.squarecross.photoalbum.domain.Album;
 import com.squarecross.photoalbum.domain.Photo;
 import com.squarecross.photoalbum.dto.PhotoDto;
+import com.squarecross.photoalbum.dto.PhotoIdsDto;
 import com.squarecross.photoalbum.dto.PhotoMoveDto;
 import com.squarecross.photoalbum.mapper.PhotoMapper;
 import com.squarecross.photoalbum.repository.AlbumRepository;
@@ -165,4 +166,27 @@ public class PhotoService {
     }
 
 
+    public void deletePhotos(PhotoIdsDto photoIdsDto) throws IOException {
+        List<Photo> photos = photoRepository.findAllById(photoIdsDto.getPhotoIds());
+
+        for(Photo photo: photos){
+            Files.deleteIfExists(Paths.get(Constants.PATH_PREFIX+photo.getOriginalUrl()));
+            Files.deleteIfExists(Paths.get(Constants.PATH_PREFIX+photo.getThumbUrl()));
+        }
+
+        photoRepository.deleteAllByIdInBatch(photoIdsDto.getPhotoIds());
+    }
+
+    public void validateFiles(MultipartFile[] files) throws IOException {
+        for (MultipartFile file : files) {
+            if (ImageIO.read(file.getInputStream()) == null){
+                throw new IllegalArgumentException("이미지 파일만 올려주세요");
+            }
+
+            String ext = StringUtils.getFilenameExtension(file.getOriginalFilename());
+            if(!Constants.EXT_LIST.contains(ext)) {
+                throw new IllegalArgumentException("이미지 파일만 올려주세요");
+            }
+        }
+    }
 }
